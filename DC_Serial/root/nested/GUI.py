@@ -9,8 +9,10 @@ Created on Aug 20, 2016
 import sys
 import serial.tools.list_ports
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QLineEdit, QApplication, QLabel
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QTimer
 import traceback
+import ctypes
 
 ###########################################
 #########START GUI CLASS###################
@@ -26,34 +28,42 @@ class GUI(QWidget):                                             #GUI class inher
         self.dataready = 0 
         self.serialready = 0
         
-    def initUI(self):                
+    def initUI(self):      
+        self.picture = QLabel(self)                                         #Picture
+        pixmap = QPixmap(r"C:\Users\The_Beast\Pictures\Test.png")  
+        self.picture.setPixmap(pixmap)  
+        self.picture.resize(400, 100)
+        self.picture.move(0, 260)  
+        self.picture.setScaledContents(True)
+        
+          
         self.quitbtn = QPushButton('Quit', self)                            #Quit Button
         self.quitbtn.setStyleSheet("background-color:#505160; color:#FFFFFF; border-style: outset; border-width: 1px; border-color:#FFFFFF")
         self.quitbtn.clicked.connect(self.quitButton)
         self.quitbtn.resize(75, 22)
-        self.quitbtn.move(210, 220)       
+        self.quitbtn.move(205, 220)       
         
         self.openbtn = QPushButton('Open', self)                            #Open Button
         self.openbtn.setStyleSheet("background-color:#505160; color:#FFFFFF; border-style: outset; border-width: 1px; border-color:#FFFFFF")
         self.openbtn.clicked.connect(self.openButton)
         self.openbtn.resize(75, 22)
-        self.openbtn.move(200, 20)
+        self.openbtn.move(215, 20)
         
-        self.setbtn = QPushButton('Set Values', self)                            #Open Button
+        self.setbtn = QPushButton('Set Values', self)                            #Set Values Button
         self.setbtn.setStyleSheet("background-color:#505160; color:#FFFFFF; border-style: outset; border-width: 1px; border-color:#FFFFFF")
         self.setbtn.clicked.connect(self.setButton)
         self.setbtn.resize(75, 22)
-        self.setbtn.move(115, 220)
+        self.setbtn.move(120, 220)
         
         self.portlist = QComboBox(self)                                     #Port Combo Box
         self.portlist.setStyleSheet("background-color:#505160; color:#FFFFFF; border-style: outset; border-width: 1px; border-color:#FFFFFF")
         self.portlist.resize(100, 20)
-        self.portlist.move(90,20)
+        self.portlist.move(105,20)
         
         self.baudedit = QLineEdit(self)                                     #Baud Rate Edit
         self.baudedit.setStyleSheet("background-color:#505160; color:#FFFFFF; border-style: outset; border-width: 1px; border-color:#FFFFFF")
         self.baudedit.setText("115200")
-        self.baudedit.resize(60, 20)
+        self.baudedit.resize(75, 20)
         self.baudedit.move(20, 20)
         
         self.bright1 = QLineEdit(self)                                     #Brightness 1 Edit
@@ -122,7 +132,8 @@ class GUI(QWidget):                                             #GUI class inher
         self.battlabel.resize(200, 20)
         self.battlabel.move(80, 180)
         
-        self.setGeometry(300, 300, 400, 400)
+        self.move(300,300)
+        self.setFixedSize(400, 400)
         self.setStyleSheet("background-color:#68829E")                            #THIS SETS BG COLOR
         self.setWindowTitle('Dauntless Concepts Configuration')    
         self.show()
@@ -227,6 +238,9 @@ def serial_ports(dc_gui):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(r"C:\Users\The_Beast\Pictures\Icon.png"))           #Sets window and taskbar icon
+    myappid = 'dc.dc.dc.dc' # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     myapp = GUI()
     myLED = LED()
     serial_ports(myapp)
