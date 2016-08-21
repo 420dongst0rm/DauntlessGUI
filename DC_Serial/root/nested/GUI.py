@@ -30,7 +30,7 @@ class GUI(QWidget):                                             #GUI class inher
         
     def initUI(self):      
         self.picture = QLabel(self)                                         #Picture
-        pixmap = QPixmap(r"C:\Users\The_Beast\Pictures\Test.png")  
+        pixmap = QPixmap(r".\images\Test.png")  
         self.picture.setPixmap(pixmap)  
         self.picture.resize(400, 100)
         self.picture.move(0, 260)  
@@ -238,7 +238,7 @@ def serial_ports(dc_gui):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(r"C:\Users\The_Beast\Pictures\Icon.png"))           #Sets window and taskbar icon
+    app.setWindowIcon(QIcon(r".\images\Icon.png"))           #Sets window and taskbar icon
     myappid = 'dc.dc.dc.dc' # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     myapp = GUI()
