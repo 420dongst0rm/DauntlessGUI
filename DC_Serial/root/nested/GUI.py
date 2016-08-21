@@ -23,10 +23,11 @@ class GUI(QWidget):                                             #GUI class inher
         super().__init__()                                      #Call constructor to parent of GUI
         self.initUI()                                           #Call initUI method
         self.serialopen = 0
-        self.getintialvalues = 0   
+        self.getinitialvalues = 0   
         self.count = 0   
         self.dataready = 0 
         self.serialready = 0
+        self.validdata = 0
         
     def initUI(self):      
         self.picture = QLabel(self)                                         #Picture
@@ -99,7 +100,7 @@ class GUI(QWidget):                                             #GUI class inher
         self.statuslabel = QLabel(self)
         self.statuslabel.setStyleSheet("color:#FFFFFF; border-style: outset")
         self.statuslabel.setText("Status: Idle")
-        self.statuslabel.resize(150, 20)
+        self.statuslabel.resize(300, 20)
         self.statuslabel.move(20, 375)
         
         self.chan1label = QLabel(self)
@@ -162,6 +163,14 @@ class GUI(QWidget):                                             #GUI class inher
         if(self.serialopen==1 and self.getinitialvalues==1):
             print('Setting values.')
             self.statuslabel.setText("Status: Setting values")
+            try:
+                self.serialport.send(b"BRIGHTNESS1_"+self.bright1.text().encode('utf-8')+b"\n")
+                self.serialport.send(b"BRIGHTNESS2_"+self.bright2.text().encode('utf-8')+b"\n")
+                self.serialport.send(b"BRIGHTNESS3_"+self.bright3.text().encode('utf-8')+b"\n")
+                self.serialport.send(b"TEMP_"+self.tempedit.text().encode('utf-8')+b"\n")  
+                self.serialport.send(b"LOWBATT_"+self.lowbattedit.text().encode('utf-8')+b"\n")               
+            except Exception:
+                print(traceback.format_exc())
 ###########################################
 #########END GUI CLASS#####################
 ###########################################
@@ -220,7 +229,7 @@ class SerialPort:
         else:
             return 0
         
-    def getValue(self, command):
+    def send(self, command):
         if self.ser.isOpen():
             self.ser.write(command)
 ###########################################
@@ -245,32 +254,43 @@ if __name__ == '__main__':
     myLED = LED()
     serial_ports(myapp)
     
-    def tick():
-        if(myapp.serialopen==1 and myapp.getintialvalues==0):
+    def tick():   
+        if(myapp.serialopen==1 and myapp.getinitialvalues==0):
             myapp.statuslabel.setText("Status: Getting Current Values")
             myapp.count+=1
             
             if(myapp.count==15):
-                myapp.serialport.getValue('SOFTVALUES\n'.encode('utf-8'))
+                myapp.serialport.send('SOFTVALUES\n'.encode('utf-8'))
             elif(myapp.count==16):
                 data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
                 print(data)
-                data = data.decode('utf-8')
-                values = data.split("\r\n")
-                print(values[0])
-                myapp.bright1.setText(values[0])
-                print(values[1])
-                myapp.bright2.setText(values[1])
-                print(values[2])
-                myapp.bright3.setText(values[2])
-                print(values[3])
-                myapp.tempedit.setText(values[3])
-                print(values[4])
-                myapp.lowbattedit.setText(values[4])
-                myapp.getinitialvalues=1
-                myapp.count+=1
-            elif(myapp.count>=17):
+                if(len(data)!=23):
+                    myapp.validdata = 0
+                else:
+                    myapp.validdata = 1
+                    data = data.decode('utf-8')
+                    values = data.split("\r\n")
+                    print(values[0])
+                    myapp.bright1.setText(values[0])
+                    print(values[1])
+                    myapp.bright2.setText(values[1])
+                    print(values[2])
+                    myapp.bright3.setText(values[2])
+                    print(values[3])
+                    myapp.tempedit.setText(values[3])
+                    print(values[4])
+                    myapp.lowbattedit.setText(values[4])
+                    myapp.getinitialvalues=1
+                    myapp.count+=1
+        elif(myapp.count>=17):
+            if(myapp.validdata==1):
                 myapp.statuslabel.setText("Status: Connected")
+            else:
+                myapp.statuslabel.setText("Status: Connected to Unknown Device")
+                    
+            if(myapp.serialport.ser.in_waiting>0):
+                data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
+                print(data)
 
     timer = QTimer()
     timer.timeout.connect(tick)
