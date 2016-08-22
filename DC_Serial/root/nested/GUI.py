@@ -28,6 +28,7 @@ class GUI(QWidget):                                             #GUI class inher
         self.dataready = 0 
         self.serialready = 0
         self.validdata = 0
+        self.senddata = 0
         
     def initUI(self):      
         self.picture = QLabel(self)                                         #Picture
@@ -163,14 +164,7 @@ class GUI(QWidget):                                             #GUI class inher
         if(self.serialopen==1 and self.getinitialvalues==1):
             print('Setting values.')
             self.statuslabel.setText("Status: Setting values")
-            try:
-                self.serialport.send(b"BRIGHTNESS1_"+self.bright1.text().encode('utf-8')+b"\n")
-                self.serialport.send(b"BRIGHTNESS2_"+self.bright2.text().encode('utf-8')+b"\n")
-                self.serialport.send(b"BRIGHTNESS3_"+self.bright3.text().encode('utf-8')+b"\n")
-                self.serialport.send(b"TEMP_"+self.tempedit.text().encode('utf-8')+b"\n")  
-                self.serialport.send(b"LOWBATT_"+self.lowbattedit.text().encode('utf-8')+b"\n")               
-            except Exception:
-                print(traceback.format_exc())
+            self.senddata = 1
 ###########################################
 #########END GUI CLASS#####################
 ###########################################
@@ -291,6 +285,17 @@ if __name__ == '__main__':
             if(myapp.serialport.ser.in_waiting>0):
                 data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
                 print(data)
+                
+        if(myapp.serialopen==1 and myapp.senddata>0):
+            if(myapp.senddata==1):
+                myapp.serialport.send(b"BRIGHTNESS1_"+myapp.bright1.text().encode('utf-8')+b"\n")
+                myapp.serialport.send(b"BRIGHTNESS2_"+myapp.bright2.text().encode('utf-8')+b"\n")
+                myapp.serialport.send(b"BRIGHTNESS3_"+myapp.bright3.text().encode('utf-8')+b"\n")
+                myapp.senddata+=1
+            elif(myapp.senddata==2):
+                myapp.serialport.send(b"TEMP_"+myapp.tempedit.text().encode('utf-8')+b"\n")  
+                myapp.serialport.send(b"LOWBATT_"+myapp.lowbattedit.text().encode('utf-8')+b"\n")    
+                myapp.senddata=0           
 
     timer = QTimer()
     timer.timeout.connect(tick)
