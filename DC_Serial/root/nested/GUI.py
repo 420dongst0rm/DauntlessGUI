@@ -155,6 +155,7 @@ class GUI(QWidget):                                             #GUI class inher
         elif self.openbtn.text() == 'Close':
             if self.serialport.closeport():
                 self.openbtn.setText('Open')
+                myapp.statuslabel.setStyleSheet("color:#FFFFFF")
                 self.statuslabel.setText("Status: Idle")
                 self.serialopen = 0
                 self.count = 0
@@ -255,6 +256,7 @@ if __name__ == '__main__':
     
     def tick():   
         if(myapp.serialopen==1 and myapp.getinitialvalues==0):
+            myapp.statuslabel.setStyleSheet("color:#FFFFFF")
             myapp.statuslabel.setText("Status: Getting Current Values")
             myapp.count+=1
             
@@ -281,10 +283,12 @@ if __name__ == '__main__':
                     myapp.lowbattedit.setText(values[4])
                     myapp.getinitialvalues=1
                     myapp.count+=1
-        elif(myapp.count>=17):
+        elif(myapp.count>=17 and myapp.senddata==0):
             if(myapp.validdata==1):
+                myapp.statuslabel.setStyleSheet("color:#00FF00")
                 myapp.statuslabel.setText("Status: Connected")
             else:
+                myapp.statuslabel.setStyleSheet("color:#FF0000")
                 myapp.statuslabel.setText("Status: Connected to Unknown Device")
                     
             if(myapp.serialport.ser.in_waiting>0):
@@ -293,14 +297,86 @@ if __name__ == '__main__':
                 
         if(myapp.serialopen==1 and myapp.senddata>0):
             if(myapp.senddata==1):
+                myapp.statuslabel.setStyleSheet("color:#FFFFFF")
+                myapp.statuslabel.setText("Status: Setting Channel 1 Brightness")
                 myapp.serialport.send(b"BRIGHTNESS1_"+myapp.bright1.text().encode('utf-8')+b"\n")
-                myapp.serialport.send(b"BRIGHTNESS2_"+myapp.bright2.text().encode('utf-8')+b"\n")
-                myapp.serialport.send(b"BRIGHTNESS3_"+myapp.bright3.text().encode('utf-8')+b"\n")
                 myapp.senddata+=1
             elif(myapp.senddata==2):
+                if(myapp.serialport.ser.in_waiting>0):
+                    data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
+                    logging.debug(data)
+                    if(b'Setting' in data):
+                        myapp.statuslabel.setStyleSheet("color:#00FF00")
+                        myapp.statuslabel.setText("Status: Successful")
+                    elif(b'Invalid' in data):
+                        myapp.statuslabel.setStyleSheet("color:#FF0000")
+                        myapp.statuslabel.setText("Status: Failed")
+                    myapp.senddata+=1
+            elif(myapp.senddata==3):   
+                myapp.statuslabel.setStyleSheet("color:#FFFFFF")
+                myapp.statuslabel.setText("Status: Setting Channel 2 Brightness")     
+                myapp.serialport.send(b"BRIGHTNESS2_"+myapp.bright2.text().encode('utf-8')+b"\n")
+                myapp.senddata+=1
+            elif(myapp.senddata==4):
+                if(myapp.serialport.ser.in_waiting>0):
+                    data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
+                    logging.debug(data)
+                    if(b'Setting' in data):
+                        myapp.statuslabel.setStyleSheet("color:#00FF00")
+                        myapp.statuslabel.setText("Status: Successful")
+                    elif(b'Invalid' in data):
+                        myapp.statuslabel.setStyleSheet("color:#FF0000")
+                        myapp.statuslabel.setText("Status: Failed")
+                    myapp.senddata+=1
+            elif(myapp.senddata==5):  
+                myapp.statuslabel.setStyleSheet("color:#FFFFFF")
+                myapp.statuslabel.setText("Status: Setting Channel 3 Brightness") 
+                myapp.serialport.send(b"BRIGHTNESS3_"+myapp.bright3.text().encode('utf-8')+b"\n")
+                myapp.senddata+=1
+            elif(myapp.senddata==6):
+                if(myapp.serialport.ser.in_waiting>0):
+                    data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
+                    logging.debug(data)
+                    if(b'Setting' in data):
+                        myapp.statuslabel.setStyleSheet("color:#00FF00")
+                        myapp.statuslabel.setText("Status: Successful")
+                    elif(b'Invalid' in data):
+                        myapp.statuslabel.setStyleSheet("color:#FF0000")
+                        myapp.statuslabel.setText("Status: Failed")
+                    myapp.senddata+=1
+            elif(myapp.senddata==7):
+                myapp.statuslabel.setStyleSheet("color:#FFFFFF")
+                myapp.statuslabel.setText("Status: Setting Max LED Temperature")
                 myapp.serialport.send(b"TEMP_"+myapp.tempedit.text().encode('utf-8')+b"\n")  
-                myapp.serialport.send(b"LOWBATT_"+myapp.lowbattedit.text().encode('utf-8')+b"\n")    
-                myapp.senddata=0           
+                myapp.senddata+=1
+            elif(myapp.senddata==8):
+                if(myapp.serialport.ser.in_waiting>0):
+                    data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
+                    logging.debug(data)
+                    if(b'Setting' in data):
+                        myapp.statuslabel.setStyleSheet("color:#00FF00")
+                        myapp.statuslabel.setText("Status: Successful")
+                    elif(b'Invalid' in data):
+                        myapp.statuslabel.setStyleSheet("color:#FF0000")
+                        myapp.statuslabel.setText("Status: Failed")
+                    myapp.senddata+=1
+            elif(myapp.senddata==9):
+                myapp.statuslabel.setStyleSheet("color:#FFFFFF")
+                myapp.statuslabel.setText("Status: Setting Min Battery Voltage")
+                myapp.serialport.send(b"LOWBATT_"+myapp.lowbattedit.text().encode('utf-8')+b"\n")
+                myapp.senddata+=1  
+            elif(myapp.senddata==10):
+                if(myapp.serialport.ser.in_waiting>0):
+                    data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
+                    logging.debug(data)
+                    if(b'Setting' in data):
+                        myapp.statuslabel.setStyleSheet("color:#00FF00")
+                        myapp.statuslabel.setText("Status: Successful")
+                    elif(b'Invalid' in data):
+                        myapp.statuslabel.setStyleSheet("color:#FF0000")
+                        myapp.statuslabel.setText("Status: Failed")
+                    myapp.senddata=0    
+                         
 
     timer = QTimer()
     timer.timeout.connect(tick)
