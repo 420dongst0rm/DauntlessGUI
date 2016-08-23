@@ -7,12 +7,17 @@ Created on Aug 20, 2016
 #http://www.tutorialspoint.com/python/python_classes_objects.htm
 
 import sys
+import logging
 import serial.tools.list_ports
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QLineEdit, QApplication, QLabel
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QTimer
 import traceback
 import ctypes
+
+#############LOGGING#######################
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)     #DEBUG prints all.  Set to INFO/WARNING/ERROR or CRITICAL to disable prints.
+###########################################
 
 ###########################################
 #########START GUI CLASS###################
@@ -162,7 +167,7 @@ class GUI(QWidget):                                             #GUI class inher
         
     def setButton(self):
         if(self.serialopen==1 and self.getinitialvalues==1):
-            print('Setting values.')
+            logging.debug('Setting values.')
             self.statuslabel.setText("Status: Setting values")
             self.senddata = 1
 ###########################################
@@ -202,15 +207,15 @@ class SerialPort:
         self.open = 0
         
     def openport(self):                 #Open selected port
-        print("Opening {} at {}.".format(self.ser.port, self.ser.baudrate))
+        logging.debug("Opening {} at {}.".format(self.ser.port, self.ser.baudrate))
         
         try: 
             self.ser.open()
             self.open = 1
-            print("Port open.")
+            logging.debug("Port open.")
             return 1
         except Exception:
-            print(traceback.format_exc())
+            logging.debug(traceback.format_exc())
             return 0
             exit()
         
@@ -218,7 +223,7 @@ class SerialPort:
         if self.ser.isOpen():
             self.ser.close()
             self.open = 0
-            print("Port closed.")
+            logging.debug("Port closed.")
             return 1
         else:
             return 0
@@ -235,7 +240,7 @@ def serial_ports(dc_gui):
     ports = list(serial.tools.list_ports.comports())
     ports.sort();
     for p in ports:
-        print(p)
+        logging.debug(p)
         dc_gui.portlist.addItem(p.device)
 #################################################
 
@@ -257,22 +262,22 @@ if __name__ == '__main__':
                 myapp.serialport.send('SOFTVALUES\n'.encode('utf-8'))
             elif(myapp.count==16):
                 data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
-                print(data)
+                logging.debug(data)
                 if(len(data)!=23):
                     myapp.validdata = 0
                 else:
                     myapp.validdata = 1
                     data = data.decode('utf-8')
                     values = data.split("\r\n")
-                    print(values[0])
+                    logging.debug(values[0])
                     myapp.bright1.setText(values[0])
-                    print(values[1])
+                    logging.debug(values[1])
                     myapp.bright2.setText(values[1])
-                    print(values[2])
+                    logging.debug(values[2])
                     myapp.bright3.setText(values[2])
-                    print(values[3])
+                    logging.debug(values[3])
                     myapp.tempedit.setText(values[3])
-                    print(values[4])
+                    logging.debug(values[4])
                     myapp.lowbattedit.setText(values[4])
                     myapp.getinitialvalues=1
                     myapp.count+=1
@@ -284,7 +289,7 @@ if __name__ == '__main__':
                     
             if(myapp.serialport.ser.in_waiting>0):
                 data = myapp.serialport.ser.read(myapp.serialport.ser.in_waiting)
-                print(data)
+                logging.debug(data)
                 
         if(myapp.serialopen==1 and myapp.senddata>0):
             if(myapp.senddata==1):
