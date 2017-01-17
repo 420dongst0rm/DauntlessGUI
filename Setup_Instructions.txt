@@ -1,0 +1,119 @@
+Arduino IDE Version: 1.6.13
+Atmel Studio Version: 7.0.790
+Atmel-ICE Programmer
+libusb-win32 Version: 1.2.6.0
+
+Single Driver (ATmega8) Fuse Bits:
+Low - 0xE4
+High - 0xC8			//Changed to 0xC8 -- boot flash 1024
+
+8 MHz internal oscillator
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+FT232 Cable Install:
+RX Pad - Yellow Wire
+TX Pad - Orange Wire
+RTS Pad - Green Wire
+GND Pad - Black Wire
+
+Notch on the ICE should be pointing towards the edge of the board.
+Notch on USBtinyisp should be removed and pointing towards middle of board.
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+Set the fuses with Atmel Studio.
+
+Make sure the Arduino IDE is closed.
+
+Copy the ATmega8 bootloader to: arduino_directory/hardware/arduino/avr/bootloaders
+
+Edit boards.txt and add:
+
+##############################################################
+
+DCatmega8.name=Dauntless Concepts Single Driver - 8 MHz
+
+DCatmega8.upload.tool=avrdude
+DCatmega8.upload.protocol=arduino
+DCatmega8.upload.maximum_size=7168
+DCatmega8.upload.speed=38400
+
+DCatmega8.bootloader.tool=avrdude1
+DCatmega8.bootloader.low_fuses=0xe4
+DCatmega8.bootloader.high_fuses=0xc8							#SEE THE NOTE ABOVE ABOUT 0xC8
+DCatmega8.bootloader.file=DC_ATmega8/ATmegaBOOT.hex				#CHANGE THIS DIRECTORY TO WHEREVER YOU BUILT THE NEW BOOTLOADER
+DCatmega8.bootloader.unlock_bits=0x3F
+DCatmega8.bootloader.lock_bits=0xFF
+
+DCatmega8.build.mcu=atmega8
+DCatmega8.build.f_cpu=8000000L
+DCatmega8.build.board=AVR_DCSD
+DCatmega8.build.core=arduino
+DCatmega8.build.variant=standard
+
+##############################################################
+
+Edit programmers.txt and add:
+
+##############################################################
+
+atmelice.name=Atmel-ICE
+atmelice.communication=usb
+atmelice.protocol=atmelice_isp
+atmelice.program.tool=avrdude
+atmelice.program.extra_params=
+
+##############################################################
+
+Edit platform.txt and add the following to the top of the AVR Uploader/Programmers tools section:
+
+# AVRDUDE for microcontrollers with no extended fuses
+###############################################################
+
+tools.avrdude1.path={runtime.tools.avrdude.path}
+tools.avrdude1.cmd.path={path}/bin/avrdude
+tools.avrdude1.config.path={path}/etc/avrdude.conf
+
+tools.avrdude1.upload.params.verbose=-v
+tools.avrdude1.upload.params.quiet=-q -q
+# tools.avrdude1.upload.verify is needed for backwards compatibility with IDE 1.6.8 or older, IDE 1.6.9 or newer overrides this value
+tools.avrdude1.upload.verify=
+tools.avrdude1.upload.params.noverify=-V
+tools.avrdude1.upload.pattern="{cmd.path}" "-C{config.path}" {upload.verbose} {upload.verify} -p{build.mcu} -c{upload.protocol} -P{serial.port} -b{upload.speed} -D "-Uflash:w:{build.path}/{build.project_name}.hex:i"
+
+tools.avrdude1.program.params.verbose=-v
+tools.avrdude1.program.params.quiet=-q -q
+# tools.avrdude1.program.verify is needed for backwards compatibility with IDE 1.6.8 or older, IDE 1.6.9 or newer overrides this value
+tools.avrdude1.program.verify=
+tools.avrdude1.program.params.noverify=-V
+tools.avrdude1.program.pattern="{cmd.path}" "-C{config.path}" {program.verbose} {program.verify} -p{build.mcu} -c{protocol} {program.extra_params} "-Uflash:w:{build.path}/{build.project_name}.hex:i"
+
+tools.avrdude1.erase.params.verbose=-v
+tools.avrdude1.erase.params.quiet=-q -q
+tools.avrdude1.erase.pattern="{cmd.path}" "-C{config.path}" {erase.verbose} -p{build.mcu} -c{protocol} {program.extra_params} -e -Ulock:w:{bootloader.unlock_bits}:m -Uhfuse:w:{bootloader.high_fuses}:m -Ulfuse:w:{bootloader.low_fuses}:m
+
+tools.avrdude1.bootloader.params.verbose=-v
+tools.avrdude1.bootloader.params.quiet=-q -q
+tools.avrdude1.bootloader.pattern="{cmd.path}" "-C{config.path}" {bootloader.verbose} -p{build.mcu} -c{protocol} {program.extra_params} "-Uflash:w:{runtime.platform.path}/bootloaders/{bootloader.file}:i" -Ulock:w:{bootloader.lock_bits}:m
+
+# AVRDUDE for microcontrollers with no extended fuses
+###############################################################
+
+**Don't plug in the ICE with power applied to the board or the ICE's USB plugged in**
+
+**FT232 cable can't be plugged in at the same time as the ICE or you can't communicate with the ATmega.**
+
+Plug in the ICE and run the libusb-win32 filter installer.
+
+Install the three filters for vid:03eb pid:2141
+
+Open the Arduino IDE and select the DC board/Atmel-ICE programmer.
+
+Upload the bootloader.
+
+Turn off the power, unplug the ICE and plug the FT232 in.
+
+Upload like normal from the Arduino IDE.
