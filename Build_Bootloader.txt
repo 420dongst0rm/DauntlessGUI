@@ -1,0 +1,16 @@
+Edit the atmega8 bootloader with the following:
+
+LDSECTION  = --section-start=.text=0x1800
+FUSE_L     = 0xe4
+FUSE_H     = 0xc8
+
+DEFS       = -DF_CPU=8000000 -DBAUD_RATE=38400
+
+DIRAVR = ../../../../tools/avr
+
+Save the file.
+
+Open a command line inside of the atmega8 folder and run command make.
+
+Flash the new hex using Atmel Studio or
+change DCatmega8.bootloader.file= to the new directory and flash with Arduino IDE.
